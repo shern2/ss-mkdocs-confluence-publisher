@@ -1,0 +1,177 @@
+[project]
+name = "ss-mkdocs-confluence-publisher"
+version = "0.2.1"
+description = "A MkDocs plugin to publish documentation to Confluence"
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+license = { text = "Apache-2.0" }
+authors = [
+    { name = "Jonas von Andrian", email = "j.andrianmueller@outlook.com" },
+    { name = "Shern" },
+]
+keywords = ["mkdocs", "confluence", "documentation"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Topic :: Software Development :: Documentation",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "mkdocs>=1.0",
+    "atlassian-python-api>=3.14.0",
+    "mistune>=3.0.0",
+    "python-dotenv",
+]
+
+
+[project.entry-points."mkdocs.plugins"]
+confluence-publisher = "mkdocs_confluence_publisher:ConfluencePublisherPlugin"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["mkdocs_confluence_publisher"]
+
+
+[tool.pytest.ini_options]
+# Test discovery
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+
+# Execution options
+addopts = [
+    "-v",
+    "--tb=short",
+    "--strict-markers",
+    "--asyncio-mode=auto",
+    "--cov=.",
+    "--cov-report=term-missing",
+    "--cov-report=html:htmlcov",
+]
+
+# Async test configuration
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+
+# Test markers
+markers = [
+    "unit: marks tests as unit tests (fast tests using mocks)",
+    "integration: marks tests as integration tests (real API calls)",
+    "e2e: marks tests as end-to-end workflow tests",
+    "experimental: marks tests as experimental/WIP tests",
+    "slow: marks tests as slow running (deselect with '-m \"not slow\"')",
+    "asyncio: marks tests as async tests",
+]
+
+# Warning filters
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    "ignore::PendingDeprecationWarning",
+    "ignore::pytest.PytestUnraisableExceptionWarning",
+]
+
+# Coverage configuration
+[tool.coverage.run]
+source = ["."]
+omit = [
+    "tests/*",
+    "logs/*",
+    "examples/*",
+    "*/migrations/*",
+    "*/__pycache__/*",
+    "*.egg-info/*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
+]
+
+
+[tool.ruff]
+line-length = 120
+fix = true
+unsafe-fixes = false
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+docstring-code-format = true
+
+[tool.ruff.lint]
+select = [
+    "F",  # default Ruff rules
+    "E",  # pycodestyle Errors
+    "W",  # pycodestyle Warnings
+    "I",  # import sorting
+    "UP", # modern syntax updates
+    "B",  # flake8 common pitfalls & best practices
+    "Q",  # flake8 consistent quotes
+    "N",  # naming conventions,
+]
+ignore = [
+    "F401", # Unused import
+    "E501", # line too long
+    "B008", # function call in argument defaults
+    "D400", # first line in docstring should end with period
+    # "D413", # missing blank line after last section
+    # "W293", # blank line contains whitespace
+    # "W291", # trailing whitespace
+]
+
+fixable = ["ALL"]
+
+extend-select = [
+    "PLR2004", # magic value used in comparison
+    "D101",    # missing docstring in public class
+    "D102",    # missing docstring in public method
+    "D103",    # missing docstring in public function
+    "D201",    # no blank lines before function docstring
+    "D202",    # no blank lines after function docstring
+    "D215",    # section underline is over-indented
+    # "T201",    # 'print' found (should use logging)
+]
+
+[tool.ruff.lint.isort]
+combine-as-imports = true
+force-wrap-aliases = true
+
+[tool.ruff.lint.per-file-ignores]
+# Allow print statements in tests, examples, and notebooks
+"tests/**/*.py" = ["T201", "PLR2004"]
+"examples/**/*.py" = ["T201"]
+"notebooks/**/*.ipynb" = ["T201", "F401"]
+
+[tool.ruff.lint.pep8-naming]
+classmethod-decorators = ["classmethod", "pydantic.field_validator"]
+
+[tool.pyrefly]
+search-path = ["src"]
+
+[dependency-groups]
+dev = [
+    "pyrefly>=0.46.1",
+    "pytest>=9.0.2",
+    "pytest-asyncio>=1.3.0",
+    "pytest-cov>=7.0.0",
+    "pytest-mock>=3.15.1",
+    "ruff>=0.14.10",
+]

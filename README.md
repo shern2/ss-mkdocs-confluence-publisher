@@ -1,5 +1,18 @@
 # MkDocs Confluence Publisher Plugin
 
+> [!CAUTION]
+> This is a **hard fork** of the original [mkdocs-confluence-publisher](https://github.com/johnny/mkdocs-confluence-publisher).
+> This version is **unmaintained** and is published to PyPI as `ss-mkdocs-confluence-publisher`.
+
+This version adds the following features:
+- **Orphan Page Support**: Automatically creates pages in Confluence for Markdown files not listed in `mkdocs.yml`, preserving directory hierarchy.
+- **Enhanced Markdown Support**:
+    - **Admonitions**: Full support for standard Markdown admonitions (`!!! note`, etc.) mapped to Confluence macros.
+    - **Expandable Sections**: Support for `pymdownx.details` (`??? expand`) syntax using Confluence's expand macro.
+    - **Table of Contents**: Support for `[TOC]` markers mapped to Confluence's TOC macro.
+- **Improved Attachment Handling**: Better detection and uploading of local images.
+- **Modern Build System**: Built with `hatchling` and optimized for use with `uv`.
+
 This MkDocs plugin automatically publishes your documentation to Confluence. It creates a hierarchical structure in Confluence that mirrors your MkDocs site structure, updates page content, and handles attachments.
 
 ## Features
@@ -11,10 +24,9 @@ This MkDocs plugin automatically publishes your documentation to Confluence. It 
 
 ## Installation
 
-Install the plugin using pip:
-
+Install the plugin using uv:
 ```bash
-pip install mkdocs-confluence-publisher
+uv pip install ss-mkdocs-confluence-publisher
 ```
 
 ## Configuration

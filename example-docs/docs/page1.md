@@ -1,15 +1,21 @@
-# Page 1
+# Page 1 - Standard Features
 
-This is the first page. It contains a simple paragraph of text.
+This is a standard page included in the `mkdocs.yml` navigation.
 
-Here is a link back to the [home page](index.md).
+## Code Blocks
 
-## Mermaid Diagram
+Confluence code macros are supported with language highlighting.
 
-```mermaid
-graph TD;
-    A-->B;
-    A-->C;
-    B-->D;
-    C-->D;
+```python
+def hello_world():
+    print("Hello from MkDocs Confluence Publisher!")
 ```
+
+## Tables
+
+| Feature | Support |
+| :--- | :--- |
+| Admonitions | Yes |
+| Code Blocks | Yes |
+| Tables | Yes |
+| Images | Yes |

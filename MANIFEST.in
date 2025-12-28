@@ -1,4 +1,0 @@
-include LICENSE
-include README.md
-recursive-include mkdocs_confluence_publisher *.py
-recursive-include mkdocs_confluence_publisher *.txt *.md

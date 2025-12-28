@@ -1,22 +1,32 @@
-import os
 import logging
-from typing import List, Tuple
+import os
 import re
+from typing import cast
+
 import mistune
-from md2cf.confluence_renderer import ConfluenceRenderer
-from .types import MD_to_Page, ConfluencePage
+from mistune.directives import Admonition, RSTDirective, TableOfContents
 
-logger = logging.getLogger('mkdocs.plugins.confluence_publisher.store_page')
-#logger.setLevel(logging.DEBUG)
+from .renderers import ConfluenceRenderer
+from .types import ConfluencePage, MD_to_Page
 
-confluence_mistune = mistune.Markdown(renderer=ConfluenceRenderer(use_xhtml=True))
+logger = logging.getLogger("mkdocs.plugins.confluence_publisher.store_page")
+# logger.setLevel(logging.DEBUG)
+
+# Add support for MkDocs specific admonitions and expand directive
+Admonition.SUPPORTED_NAMES.update(["expand", "info", "todo", "success", "check", "done"])
+
+confluence_mistune = mistune.create_markdown(
+    renderer=ConfluenceRenderer(escape=False),
+    plugins=[RSTDirective([Admonition(), TableOfContents()])],  # pyrefly: ignore[bad-argument-type]
+)
 
 # Define the replacements for incompatible code macros
 MACRO_REPLACEMENTS = {
-    'json': 'yaml',
+    "json": "yaml",
     # Add more replacements here as needed
     # 'incompatible_language': 'compatible_language',
 }
+
 
 def replace_incompatible_macros(content: str) -> str:
     """
@@ -30,14 +40,18 @@ def replace_incompatible_macros(content: str) -> str:
     logger.debug("Replaced incompatible code macros")
     return content
 
-def generate_confluence_content(markdown: str, md_to_page: MD_to_Page, page) -> Tuple[str, List[str]]:
+
+def generate_confluence_content(markdown: str, md_to_page: MD_to_Page, page) -> tuple[str, list[str]]:
+    """
+    Generate Confluence storage format content from markdown.
+    """
     # Scan markdown for image tags and collect filenames
     attachments = []
-    image_pattern = r'!\[.*?\]\((.*?)\)'
+    image_pattern = r"!\[.*?\]\((.*?)\)"
     for match in re.finditer(image_pattern, markdown):
         image_path = match.group(1)
         logger.debug(f"Found image reference: {image_path}")
-        if not image_path.startswith(('http://', 'https://')):
+        if not image_path.startswith(("http://", "https://")):
             full_path = os.path.join(os.path.dirname(page.file.abs_src_path), image_path)
             if os.path.exists(full_path):
                 attachments.append(full_path)
@@ -47,14 +61,24 @@ def generate_confluence_content(markdown: str, md_to_page: MD_to_Page, page) -> 
 
     logger.debug(f"Found {len(attachments)} image references")
 
+    # Support ??? (expand) by converting it to .. expand:: before parsing
+    markdown = re.sub(r"^\?\?\?\+?\s*([\w-]+)?(?:\s+\"(.*)\")?", r".. \1:: \2", markdown, flags=re.MULTILINE)
+
+    # Support !!! note by converting it to .. note:: before parsing
+    markdown = re.sub(r"^!!!\s*([\w-]+)(?:\s+\"(.*)\")?", r".. \1:: \2", markdown, flags=re.MULTILINE)
+
+    # Support [TOC] by converting it to .. toc:: before parsing
+    # This maps mkdocs/markdown.extensions.toc syntax to mistune's TableOfContents directive
+    markdown = re.sub(r"^\[TOC\]", ".. toc::", markdown, flags=re.MULTILINE | re.IGNORECASE)
+
     # Render markdown to Confluence storage format
-    confluence_content = confluence_mistune(markdown)
+    confluence_content = cast(str, confluence_mistune(markdown))
     logger.debug("Converted markdown to Confluence storage format")
 
     # Fix links to relative markdown pages
     def replace_link(match):
         href = match.group(2)
-        if href.endswith('.md') and href in md_to_page:
+        if href.endswith(".md") and href in md_to_page:
             page = md_to_page[href]
             logger.debug(f"Replaced link to {href} with Confluence page {page}")
             return f'<ac:link><ri:page ri:content-title="{page.title}" /></ac:link>'
@@ -68,13 +92,17 @@ def generate_confluence_content(markdown: str, md_to_page: MD_to_Page, page) -> 
 
     return confluence_content, attachments
 
-def update_page(markdown: str, page, confluence, md_to_page: MD_to_Page) -> List[str]:
+
+def update_page(markdown: str, page, confluence, md_to_page: MD_to_Page) -> list[str]:
+    """
+    Update a page in Confluence with markdown content.
+    """
     logger.debug(f"Starting to process page for Confluence: {page.file.src_path}")
 
     confluence_content, attachments = generate_confluence_content(markdown, md_to_page, page)
 
     # Update the page content in Confluence
-    confluence_page: ConfluencePage = md_to_page.get(page.file.src_path)
+    confluence_page: ConfluencePage | None = md_to_page.get(page.file.src_path)
     if confluence_page:
         logger.debug(f"Updating Confluence page: {confluence_page.title}")
         confluence.update_page(

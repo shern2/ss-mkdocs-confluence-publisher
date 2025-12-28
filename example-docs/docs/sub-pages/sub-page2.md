@@ -1,5 +1,3 @@
-# Sub-page 2
+# Sub Page 2
 
-This is the second sub-page.
-
-Here is a link to the [main index page](../../index.md).
+This is another nested page.

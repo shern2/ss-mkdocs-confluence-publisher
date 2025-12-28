@@ -1,5 +1,11 @@
-# Page 2
+# Page 2 - Attachments
 
-This is the second page. It demonstrates how images are handled.
+This page demonstrates attachment handling.
 
-![A sample image](images/sample-image.png)
+## Image Attachment
+
+The following image is referenced from the `images/` directory.
+
+![Example Screenshot](images/sample-image.png)
+
+When published, this image will be uploaded to the Confluence page's attachments and rendered using the Confluence image macro.

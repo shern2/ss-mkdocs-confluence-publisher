@@ -1,7 +1,0 @@
-mkdocs>=1.0
-atlassian-python-api>=3.14.0
-mistune
-md2cf
-python-dotenv
-pytest
-pytest-mock
