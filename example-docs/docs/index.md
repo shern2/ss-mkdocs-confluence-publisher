@@ -38,7 +38,7 @@ Support for `pymdownx.details` syntax is provided via Confluence's `expand` macr
 
 ## Navigation and Links
 
-- **Internal Link**: [Go to Page 1](page1.md)
+- **Internal Link**: [Go to Admonition Support](#Admonition-Support)
 - **Nested Link**: [Go to Sub Page 1](sub-pages/sub-page1.md)
 - **Orphan Link**: [Check out the Orphan Page](orphans/orphan-page.md) (This page is not in `mkdocs.yml`)
 

@@ -15,6 +15,7 @@ This version adds the following features:
     - **Table of Contents**: Support for `[TOC]` markers mapped to Confluence's native TOC macro.
     - **Horizontal Rules**: Maps Markdown `---` to native Confluence `<hr />` elements.
 - **Improved Attachment Handling**: Better detection and uploading of local images.
+- **Internal Link Validation**: Automatically validates that same-page internal links (anchors) match the casing of the target headings. This prevents issues with Confluence's case-sensitive anchor system.
 - **Modern Build System**: Built with `hatchling` and optimized for use with `uv`.
 
 This MkDocs plugin automatically publishes your documentation to Confluence. It creates a hierarchical structure in Confluence that mirrors your MkDocs site structure, updates page content, and handles attachments.

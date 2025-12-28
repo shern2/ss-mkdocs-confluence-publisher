@@ -54,16 +54,40 @@ class ConfluenceRenderer(HTMLRenderer):
         super().__init__(**kwargs)
         self.attachments = []
         self.title = None
+        self.used_ids = set()
 
     def reinit(self):
         """Reset the renderer state."""
         self.attachments = []
         self.title = None
+        self.used_ids = set()
 
     def heading(self, text: str, level: int, **attrs: Any) -> str:
         """Render a heading tag and track the title."""
         if self.title is None and level == 1:
             self.title = text
+
+        # Generate a meaningful ID from the text to support case-sensitive internal anchors
+        # This matches common Markdown slugification but preserves case as requested
+        if text:
+            # Strip HTML tags
+            clean_text = re.sub(r"<[^>]*>", "", text)
+            # Replace whitespace with hyphens
+            slug = re.sub(r"\s+", "-", clean_text)
+            # Remove non-alphanumeric/hyphen/underscore
+            slug = re.sub(r"[^\w-]", "", slug)
+            # Strip leading/trailing hyphens
+            slug = slug.strip("-")
+
+            if slug:
+                base_slug = slug
+                counter = 1
+                while slug in self.used_ids:
+                    slug = f"{base_slug}-{counter}"
+                    counter += 1
+                self.used_ids.add(slug)
+                attrs["id"] = slug
+
         return super().heading(text, level, **attrs)
 
     def structured_macro(self, name):

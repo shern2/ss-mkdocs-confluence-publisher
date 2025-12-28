@@ -175,7 +175,7 @@ plugins:
 
     # - Cross-link to orphan
     assert (
-        '<ac:link><ri:page ri:content-title="TEST - Orphan Page" /></ac:link>'
+        '<ac:link><ri:page ri:content-title="TEST - Orphan Page" /><ac:plain-text-link-body><![CDATA[Link to Orphan]]></ac:plain-text-link-body></ac:link>'
         in index_content
     )
 

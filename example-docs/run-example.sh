@@ -34,13 +34,13 @@ check_env_var "CONFLUENCE_SPACE_KEY"
 check_env_var "CONFLUENCE_PARENT_PAGE_ID"
 
 # Install the plugin in editable mode if not already installed
-if ! pip show mkdocs-confluence-publisher > /dev/null 2>&1; then
+if ! uv pip show mkdocs-confluence-publisher > /dev/null 2>&1; then
   echo "Installing the plugin in editable mode..."
-  pip install -e .. > /dev/null
+  uv pip install -e .. > /dev/null
 fi
 
 # Run the mkdocs build
 echo "Running mkdocs build..."
-mkdocs build
+uv run mkdocs build
 
 echo "--- MkDocs build complete ---"

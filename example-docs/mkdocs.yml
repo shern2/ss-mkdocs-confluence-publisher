@@ -5,6 +5,7 @@ nav:
   - 'Home': 'index.md'
   - 'Features Section':
       - 'Nested Content':
+          - index: index.md
           - 'Sub Page 1': 'sub-pages/sub-page1.md'
           - 'Sub Page 2': 'sub-pages/sub-page2.md'
 

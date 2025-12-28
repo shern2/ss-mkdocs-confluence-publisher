@@ -43,6 +43,66 @@ def replace_incompatible_macros(content: str) -> str:
     return content
 
 
+def slugify(text: str) -> str:
+    """
+    Generate a meaningful ID from the text to support case-sensitive internal anchors.
+    This matches the logic in ConfluenceRenderer.heading.
+    """
+    # Strip HTML tags
+    clean_text = re.sub(r"<[^>]*>", "", text)
+    # Replace whitespace with hyphens
+    slug = re.sub(r"\s+", "-", clean_text)
+    # Remove non-alphanumeric/hyphen/underscore
+    slug = re.sub(r"[^\w-]", "", slug)
+    # Strip leading/trailing hyphens
+    return slug.strip("-")
+
+
+def validate_internal_links(markdown: str, page_path: str):
+    """
+    Validate that same-page internal links match the case of the heading IDs.
+    """
+    # Extract all headings and their slugified IDs
+    # Heading regex: lines starting with # (ATX style)
+    heading_pattern = r"^(#{1,6})\s+(.*)$"
+    heading_ids = set()
+    used_ids = set()
+
+    for match in re.finditer(heading_pattern, markdown, re.MULTILINE):
+        heading_text = match.group(2).strip()
+        slug = slugify(heading_text)
+        if slug:
+            base_slug = slug
+            counter = 1
+            while slug in used_ids:
+                slug = f"{base_slug}-{counter}"
+                counter += 1
+            used_ids.add(slug)
+            heading_ids.add(slug)
+
+    # Find all same-page links: [text](#anchor)
+    # link_pattern matches [any text](#anchor)
+    link_pattern = r"\[[^\]]*\]\(#(.*?)\)"
+    for match in re.finditer(link_pattern, markdown):
+        anchor = match.group(1)
+        if not anchor:
+            continue
+
+        # Check for case-sensitive match
+        if anchor in heading_ids:
+            continue
+
+        # Check for case-insensitive match to find casing errors
+        lowercase_heading_ids = {h.lower(): h for h in heading_ids}
+        if anchor.lower() in lowercase_heading_ids:
+            correct_case = lowercase_heading_ids[anchor.lower()]
+            raise ValueError(
+                f"Internal link error in '{page_path}': "
+                f"Link anchor '#{anchor}' does not match the case of heading ID '#{correct_case}'. "
+                f"Confluence internal links are case-sensitive."
+            )
+
+
 def generate_confluence_content(markdown: str, md_to_page: MD_to_Page, page) -> tuple[str, list[str]]:
     """
     Generate Confluence storage format content from markdown.
@@ -77,17 +137,45 @@ def generate_confluence_content(markdown: str, md_to_page: MD_to_Page, page) -> 
     confluence_content = cast(str, confluence_mistune(markdown))
     logger.debug("Converted markdown to Confluence storage format")
 
-    # Fix links to relative markdown pages
+    # Fix links to relative markdown pages and internal anchors
     def replace_link(match):
         href = match.group(2)
-        if href.endswith(".md") and href in md_to_page:
-            page = md_to_page[href]
-            logger.debug(f"Replaced link to {href} with Confluence page {page}")
-            return f'<ac:link><ri:page ri:content-title="{page.title}" /></ac:link>'
+        link_text = match.group(4)
+
+        # Split href into path and anchor
+        parts = href.split("#", 1)
+        path = parts[0]
+        anchor = parts[1] if len(parts) > 1 else None
+
+        if path.endswith(".md") and path in md_to_page:
+            page = md_to_page[path]
+            anchor_attr = f' ac:anchor="{anchor}"' if anchor else ""
+            logger.debug(
+                f"Replaced link to {href} with Confluence page {page.title}{' (anchor: ' + anchor + ')' if anchor else ''}"
+            )
+            return (
+                f'<ac:link{anchor_attr}>'
+                f'<ri:page ri:content-title="{page.title}" />'
+                f"<ac:plain-text-link-body><![CDATA[{link_text}]]></ac:plain-text-link-body>"
+                f"</ac:link>"
+            )
+        elif not path and anchor:
+            logger.debug(f"Replaced internal anchor link: {anchor}")
+            return (
+                f'<ac:link ac:anchor="{anchor}">'
+                f"<ac:plain-text-link-body><![CDATA[{link_text}]]></ac:plain-text-link-body>"
+                f"</ac:link>"
+            )
+
         return match.group(0)
 
-    confluence_content = re.sub(r'<a (.*?)href="(.*?)"(.*?)>(.*?)</a>', replace_link, confluence_content)
-    logger.debug("Fixed links to relative markdown pages")
+    confluence_content = re.sub(
+        r'<a (.*?)href="(.*?)"(.*?)>(.*?)</a>',
+        replace_link,
+        confluence_content,
+        flags=re.DOTALL,
+    )
+    logger.debug("Fixed links to relative markdown pages and anchors")
 
     # Replace incompatible code macros
     confluence_content = replace_incompatible_macros(confluence_content)
@@ -100,6 +188,9 @@ def update_page(markdown: str, page, confluence, md_to_page: MD_to_Page) -> list
     Update a page in Confluence with markdown content.
     """
     logger.debug(f"Starting to process page for Confluence: {page.file.src_path}")
+
+    # Validate internal links casing before processing
+    validate_internal_links(markdown, page.file.src_path)
 
     confluence_content, attachments = generate_confluence_content(markdown, md_to_page, page)
 

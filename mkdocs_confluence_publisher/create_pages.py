@@ -40,6 +40,7 @@ class PageCreator:
         self.suffix = suffix
         self.space_key = space_key
         self.active_page_ids = set()
+        self.dir_to_id = {}
 
     def create_pages_in_space(self, items, parent_id, md_to_page: MD_to_Page):
         """Create pages in a space."""
@@ -61,6 +62,14 @@ class PageCreator:
             if isinstance(item, Page):
                 md_to_page[item.file.src_path] = ConfluencePage(id=page_id, title=page_title)
                 logger.debug(f"Mapped URL {item.url} to page ID {page_id}")
+
+                # Track directory ownership: map the directory to its Confluence parent ID
+                path_parts = item.file.src_path.split("/")
+                if len(path_parts) > 1:
+                    directory = "/".join(path_parts[:-1])
+                    if directory not in self.dir_to_id:
+                        self.dir_to_id[directory] = parent_id
+                        logger.debug(f"Mapped directory {directory} to parent ID {parent_id}")
 
             if isinstance(item, Section) and item.children:
                 logger.debug(f"Processing children of {page_title}")
@@ -120,13 +129,30 @@ class PageCreator:
             path_parts = file.src_path.split("/")
             current_parent_id = parent_id
 
-            # Create intermediate pages for directories
-            for part in path_parts[:-1]:
+            # Find the deepest already-mapped ancestor directory to "graft" onto
+            start_index = 0
+            for i in range(len(path_parts) - 1, 0, -1):
+                ancestor_dir = "/".join(path_parts[:i])
+                if ancestor_dir in self.dir_to_id:
+                    current_parent_id = self.dir_to_id[ancestor_dir]
+                    start_index = i
+                    logger.debug(
+                        f"Found existing ancestor for orphan {file.src_path}: {ancestor_dir} -> {current_parent_id}"
+                    )
+                    break
+
+            # Create intermediate pages for missing directories
+            current_path = "/".join(path_parts[:start_index]) if start_index > 0 else ""
+            for i in range(start_index, len(path_parts) - 1):
+                part = path_parts[i]
+                current_path = f"{current_path}/{part}" if current_path else part
+
                 dir_title = f"{self.prefix}{part}{self.suffix}"
                 page_id = self.ensure_page_exists(dir_title, current_parent_id, is_section=True)
                 if not page_id:
                     break
                 self.active_page_ids.add(str(page_id))
+                self.dir_to_id[current_path] = page_id  # Update mapping for siblings
                 current_parent_id = page_id
             else:
                 # Create the actual page
