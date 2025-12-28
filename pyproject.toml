@@ -1,6 +1,6 @@
 [project]
 name = "ss-mkdocs-confluence-publisher"
-version = "0.2.1"
+version = "0.2.0"
 description = "A MkDocs plugin to publish documentation to Confluence"
 readme = "README.md"
 requires-python = ">=3.12,<3.13"
@@ -23,7 +23,7 @@ dependencies = [
     "mkdocs>=1.0",
     "atlassian-python-api>=3.14.0",
     "mistune>=3.0.0",
-    "python-dotenv",
+    "python-dotenv>=1.2.1",
 ]
 
 

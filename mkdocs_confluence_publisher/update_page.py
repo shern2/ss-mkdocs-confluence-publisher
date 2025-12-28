@@ -5,6 +5,8 @@ from typing import cast
 
 import mistune
 from mistune.directives import Admonition, RSTDirective, TableOfContents
+from mistune.plugins.table import table
+from mistune.plugins.task_lists import task_lists
 
 from .renderers import ConfluenceRenderer
 from .types import ConfluencePage, MD_to_Page
@@ -17,7 +19,7 @@ Admonition.SUPPORTED_NAMES.update(["expand", "info", "todo", "success", "check",
 
 confluence_mistune = mistune.create_markdown(
     renderer=ConfluenceRenderer(escape=False),
-    plugins=[RSTDirective([Admonition(), TableOfContents()])],  # pyrefly: ignore[bad-argument-type]
+    plugins=[RSTDirective([Admonition(), TableOfContents()]), task_lists, table],  # pyrefly: ignore[bad-argument-type]
 )
 
 # Define the replacements for incompatible code macros

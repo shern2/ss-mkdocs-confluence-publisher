@@ -3,6 +3,8 @@
 This repository includes a sample `mkdocs` project in the `example-docs/` directory that demonstrates a wide range of features, including:
 
 - A multi-level page structure
+- **Orphan Page Support**: Automatically publishes pages not listed in `nav`.
+- **Page Pruning**: Automatically deletes removed pages in Confluence.
 - Embedded images
 - Internal and external links
 - Code blocks

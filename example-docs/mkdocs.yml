@@ -4,16 +4,15 @@ site_url: http://localhost:8000
 nav:
   - 'Home': 'index.md'
   - 'Features Section':
-      - 'Standard Page': 'page1.md'
       - 'Nested Content':
           - 'Sub Page 1': 'sub-pages/sub-page1.md'
           - 'Sub Page 2': 'sub-pages/sub-page2.md'
-  - 'Attachments': 'page2.md'
 
 plugins:
   - search
   - confluence-publisher:
       confluence_prefix: 'Example | '
       confluence_suffix: ' | Demo'
+      prune_orphans: true
       space_key: !ENV [CONFLUENCE_SPACE_KEY, 'DEMO']
       parent_page_id: !ENV [CONFLUENCE_PARENT_PAGE_ID, '12345']

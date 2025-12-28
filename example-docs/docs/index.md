@@ -42,6 +42,51 @@ Support for `pymdownx.details` syntax is provided via Confluence's `expand` macr
 - **Nested Link**: [Go to Sub Page 1](sub-pages/sub-page1.md)
 - **Orphan Link**: [Check out the Orphan Page](orphans/orphan-page.md) (This page is not in `mkdocs.yml`)
 
+## Task Lists
+
+Native Confluence task lists are supported via Markdown checkboxes.
+
+- [ ] Task 1 (incomplete)
+- [x] Task 2 (complete)
+
+## Basic Formatting
+
+Text can be **bold**, *italic*, or ~~strikethrough~~. You can also use `inline code`.
+
+## Lists
+
+### Unordered List
+- Item 1
+- Item 2
+    - Sub-item 2.1
+    - Sub-item 2.2
+- Item 3
+
+### Ordered List
+1. First item
+2. Second item
+3. Third item
+
+## Tables
+
+| Feature | Support | Note |
+| ------- | ------- | ---- |
+| Admonitions | Yes | Mapped to native macros |
+| Tables | Yes | Standard Markdown tables |
+| Code Blocks | Yes | With syntax highlighting |
+
+## Code Blocks
+
+```python
+def hello_confluence():
+    print("Hello from MkDocs Confluence Publisher!")
+
+if __name__ == "__main__":
+    hello_confluence()
+```
+
+---
+
 ## Attachments
 
 Local images are automatically uploaded as attachments to the corresponding Confluence page.

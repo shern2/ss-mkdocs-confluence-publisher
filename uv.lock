@@ -507,7 +507,7 @@ wheels = [
 
 [[package]]
 name = "ss-mkdocs-confluence-publisher"
-version = "0.2.1"
+version = "0.2.0"
 source = { editable = "." }
 dependencies = [
     { name = "atlassian-python-api" },
@@ -531,7 +531,7 @@ requires-dist = [
     { name = "atlassian-python-api", specifier = ">=3.14.0" },
     { name = "mistune", specifier = ">=3.0.0" },
     { name = "mkdocs", specifier = ">=1.0" },
-    { name = "python-dotenv" },
+    { name = "python-dotenv", specifier = ">=1.2.1" },
 ]
 
 [package.metadata.requires-dev]

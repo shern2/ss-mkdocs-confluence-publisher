@@ -6,10 +6,14 @@
 
 This version adds the following features:
 - **Orphan Page Support**: Automatically creates pages in Confluence for Markdown files not listed in `mkdocs.yml`, preserving directory hierarchy.
+- **Page Pruning**: Automatically deletes Confluence pages that no longer exist in your MkDocs source (optional).
+- **Robust Title Extraction**: Automatically extracts page titles from the first H1 tag in Markdown files or falls back to capitalized filenames.
+- **Native Task Lists**: Maps Markdown checkboxes (`- [ ]`, `- [x]`) to native interactive Confluence task list macros.
 - **Enhanced Markdown Support**:
-    - **Admonitions**: Full support for standard Markdown admonitions (`!!! note`, etc.) mapped to Confluence macros.
+    - **Admonitions**: Full support for standard Markdown admonitions (`!!! note`, etc.) mapped to corresponding Confluence macros (`info`, `tip`, `note`, `warning`).
     - **Expandable Sections**: Support for `pymdownx.details` (`??? expand`) syntax using Confluence's expand macro.
-    - **Table of Contents**: Support for `[TOC]` markers mapped to Confluence's TOC macro.
+    - **Table of Contents**: Support for `[TOC]` markers mapped to Confluence's native TOC macro.
+    - **Horizontal Rules**: Maps Markdown `---` to native Confluence `<hr />` elements.
 - **Improved Attachment Handling**: Better detection and uploading of local images.
 - **Modern Build System**: Built with `hatchling` and optimized for use with `uv`.
 
@@ -40,6 +44,7 @@ plugins:
       confluence_suffix: " - MkDocs"  # Optional: Suffix for page titles in Confluence
       space_key: "YOUR_SPACE_KEY"     # Required: Confluence space key
       parent_page_id: 123456          # Required: ID of the parent page in Confluence
+      prune_orphans: false            # Optional: If true, deletes Confluence pages that are no longer in MkDocs
 ```
 
 ## Environment Variables

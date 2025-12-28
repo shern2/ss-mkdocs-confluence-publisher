@@ -153,3 +153,41 @@ class ConfluenceRenderer(HTMLRenderer):
 
         root_element.append(url_tag)
         return root_element.render()
+
+    def list(self, text: str, ordered: bool, **attrs: Any) -> str:
+        """Render a list as a Confluence task-list if it contains tasks."""
+        if "<ac:task" in text:
+            return f"<ac:task-list>\n{text}</ac:task-list>\n"
+        return super().list(text, ordered, **attrs)
+
+    def task_list_item(self, text: str, checked: bool, **attrs: Any) -> str:
+        """Render a task list item as a Confluence task."""
+        status = "complete" if checked else "incomplete"
+        text = text.strip()
+        return f"<ac:task>\n<ac:task-status>{status}</ac:task-status>\n<ac:task-body>{text}</ac:task-body>\n</ac:task>\n"
+
+    def thematic_break(self) -> str:
+        """Render a horizontal rule as a Confluence hr tag."""
+        return "<hr />\n"
+
+    def table(self, content: str) -> str:
+        """Render a table as a Confluence table."""
+        return f'<table data-table-width="760" data-layout="default"><tbody>\n{content}</tbody></table>\n'
+
+    def table_head(self, content: str) -> str:
+        """Render a table head."""
+        return f"<tr>\n{content}</tr>\n"
+
+    def table_body(self, content: str) -> str:
+        """Render a table body."""
+        return content
+
+    def table_row(self, content: str) -> str:
+        """Render a table row."""
+        return f"<tr>\n{content}</tr>\n"
+
+    def table_cell(self, content: str, align: str | None = None, head: bool = False, **attrs: Any) -> str:
+        """Render a table cell."""
+        if head:
+            return f"<th><p><strong>{content}</strong></p></th>\n"
+        return f"<td><p>{content}</p></td>\n"
